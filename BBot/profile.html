@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - BursaryBot</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .profile-container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        .profile-card { background: white; border-radius: 24px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        /* Profile Picture Section */
+        .profile-pic-section { text-align: center; margin-bottom: 30px; }
+        .profile-pic-container { position: relative; display: inline-block; }
+        .profile-pic { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #0f766e; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .profile-pic-placeholder { width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, #0f766e, #0d5c56); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; border: 4px solid #0f766e; }
+        .upload-btn { position: absolute; bottom: 5px; right: 5px; background: #0f766e; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .upload-btn:hover { background: #0d5c56; transform: scale(1.05); }
+        .remove-pic { margin-top: 10px; background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem; }
+        
+        /* Preview Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; border-radius: 20px; padding: 20px; max-width: 500px; width: 90%; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .preview-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 12px; margin: 15px 0; }
+        .crop-area { text-align: center; }
+        .crop-area img { max-width: 100%; max-height: 300px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-group button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
+        .btn-confirm { background: #0f766e; color: white; }
+        .btn-cancel { background: #e2e8f0; color: #333; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b; }
+        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #0f766e; }
+        button[type="submit"] { width: 100%; padding: 14px; background: linear-gradient(135deg, #0f766e, #0d5c56); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; }
+        h3 { margin: 20px 0 15px 0; color: #1e293b; }
+        hr { margin: 20px 0; border: none; border-top: 1px solid #e2e8f0; }
+        .completeness-bar { background: #e2e8f0; border-radius: 10px; height: 8px; margin: 10px 0; overflow: hidden; }
+        .completeness-fill { background: #10b981; height: 100%; transition: width 0.3s; }
+        .alert { padding: 12px; border-radius: 12px; margin-bottom: 20px; }
+        .alert-success { background: #d1fae5; color: #065f46; }
+        .alert-error { background: #fee2e2; color: #991b1b; }
+        .alert-info { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h1>🤖 BursaryBot</h1></div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="chat.html">AI Chat</a>
+            <a href="profile.html">Profile</a>
+            <a href="#" id="logoutBtn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <div class="profile-card">
+            <h2>📝 My Profile</h2>
+            <div id="alertContainer"></div>
+            
+            <!-- Profile Picture Section -->
+            <div class="profile-pic-section">
+                <div class="profile-pic-container">
+                    <div id="profilePicDisplay">
+                        <div class="profile-pic-placeholder" id="profilePicPlaceholder">👤</div>
+                        <img class="profile-pic" id="profilePicImg" style="display: none;">
+                    </div>
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📷</button>
+                </div>
+                <button class="remove-pic" id="removePicBtn" style="display: none;" onclick="removeProfilePic()">Remove Photo</button>
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display: none;" onchange="previewImage(this)">
+            </div>
+            
+            <!-- Image Preview Modal -->
+            <div id="previewModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Crop & Upload Profile Picture</h3>
+                        <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div class="crop-area">
+                        <img id="previewImg" alt="Preview">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-confirm" onclick="uploadProfilePic()">Upload</button>
+                        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            
+            <form id="profileForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="full_name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Field of Study</label>
+                    <select id="field_of_study">
+                        <option value="">Select</option>
+                        <option value="IT">Information Technology (IT)</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Public Management">Public Management</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Institution</label>
+                    <input type="text" id="institution" placeholder="e.g., DUT, MUT">
+                </div>
+                
+                <div class="form-group">
+                    <label>Province</label>
+                    <select id="province">
+                        <option value="">Select</option>
+                        <option value="Gauteng">Gauteng</option>
+                        <option value="Western Cape">Western Cape</option>
+                        <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                        <option value="Eastern Cape">Eastern Cape</option>
+                        <option value="Free State">Free State</option>
+                        <option value="Limpopo">Limpopo</option>
+                        <option value="Mpumalanga">Mpumalanga</option>
+                        <option value="North West">North West</option>
+                        <option value="Northern Cape">Northern Cape</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Year of Study</label>
+                    <select id="year_of_study">
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Average Mark (%)</label>
+                    <input type="number" id="average_mark" step="0.01" min="0" max="100">
+                </div>
+                
+                <div class="form-group">
+                    <label>Parent/Guardian Income (ZAR)</label>
+                    <input type="number" id="parent_income">
+                </div>
+                
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select id="gender">
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Race</label>
+                    <select id="race">
+                        <option value="">Select</option>
+                        <option value="Black">Black</option>
+                        <option value="White">White</option>
+                        <option value="Coloured">Coloured</option>
+                        <option value="Indian">Indian</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <hr>
+                
+                <h3>🤖 AI-Powered Fields (For Better Matches)</h3>
+                
+                <div class="form-group">
+                    <label>Career Interests</label>
+                    <textarea id="career_interests" rows="2" placeholder="e.g., I am passionate about software development, AI, and cloud computing."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Skills</label>
+                    <textarea id="skills" rows="2" placeholder="e.g., Python, JavaScript, Leadership, Communication"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Short Bio</label>
+                    <textarea id="bio" rows="2" placeholder="Tell us a bit about yourself..."></textarea>
+                </div>
+                
+                <div id="completenessSection"></div>
+                
+                <button type="submit">💾 Save Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://bursarybot-backend.onrender.com/api';
+        const token = localStorage.getItem('token');
+        let selectedFile = null;
+        
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+        
+        // Load profile data
+        async function loadProfile() {
+            try {
+                const response = await fetch(`${API_URL}/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.profile) {
+                    const p = data.profile;
+                    document.getElementById('full_name').value = p.full_name || '';
+                    document.getElementById('field_of_study').value = p.field_of_study || '';
+                    document.getElementById('institution').value = p.institution || '';
+                    document.getElementById('province').value = p.province || '';
+                    document.getElementById('year_of_study').value = p.year_of_study || '1';
+                    document.getElementById('average_mark').value = p.average_mark || '';
+                    document.getElementById('parent_income').value = p.parent_income || '';
+                    document.getElementById('gender').value = p.gender || '';
+                    document.getElementById('race').value = p.race || '';
+                    document.getElementById('career_interests').value = p.career_interests || '';
+                    document.getElementById('skills').value = p.skills || '';
+                    document.getElementById('bio').value = p.bio || '';
+                }
+                
+                // Load profile picture
+                await loadProfilePicture();
+                
+                // Calculate completeness
+                await calculateCompleteness();
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+        
+        // Load profile picture
+        async function loadProfilePicture() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const response = await fetch(`${API_URL}/upload/profile-picture/${user.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.profile_pic) {
+                    document.getElementById('profilePicImg').src = data.profile_pic;
+                    document.getElementById('profilePicImg').style.display = 'block';
+                    document.getElementById('profilePicPlaceholder').style.display = 'none';
+                    document.getElementById('removePicBtn').style.display = 'block';
+                } else {
+                    document.getElementById('profilePicImg').style.display = 'none';
+                    document.getElementById('profilePicPlaceholder').style.display = 'flex';
+                    document.getElementById('removePicBtn').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading profile picture:', error);
+            }
+        }
+        
+        // Preview image before upload
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                selectedFile = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('previewModal').style.display = 'flex';
+                };
+                reader.readAsDataURL(selectedFile);
+            }
+        }
+        
+        // Upload profile picture
+        async function uploadProfilePic() {
+            if (!selectedFile) return;
+            
+            const formData = new FormData();
+            formData.append('profile_pic', selectedFile);
+            
+            try {
+                const response = await fetch(`${API_URL}/upload/profile-picture`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Profile picture updated!', 'success');
+                    closeModal();
+                    loadProfilePicture();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                showAlert(error.message, 'error');
+            }
+        }
+        
+        // Remove profile picture
+        async function removeProfilePic() {
+            if (confirm('Remove your profile picture?')) {
+                try {
+                    const response = await fetch(`${API_URL}/upload/profile-picture`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showAlert('Profile picture removed', 'success');
+                        loadProfilePicture();
+                    }
+                } catch (error) {
+                    showAlert(error.message, 'error');
+                }
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            selectedFile = null;
+        }
+        
+        // Calculate profile completeness
+        async function calculateCompleteness() {
+            const fields = ['full_name', 'field_of_study', 'institution', 'province', 'year_of_study', 'average_mark', 'parent_income'];
+            let filled = 0;
+            for (const field of fields) {
+                if (document.getElementById(field).value) filled++;
+            }
+            
+            const optional = ['gender', 'race', 'career_interests', 'skills', 'bio'];
+            for (const field of optional) {
+                if (document.getElementById(field).value) filled += 0.5;
+            }
+            
+            const percentage = Math.min(Math.round((filled / 11) * 100), 100);
+            
+            document.getElementById('completenessSection').innerHTML = `
+                <div class="alert alert-info">
+                    <strong>📊 Profile Completeness: ${percentage}%</strong>
+                    <div class="completeness-bar"><div class="completeness-fill" style="width: ${percentage}%"></div></div>
+                    ${percentage < 80 ? '<small>Complete your profile to get better bursary matches!</small>' : '<small>✅ Great! Your profile is complete.</small>'}
+                </div>
+            `;
+        }
+        
+        // Save profile
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const profileData = {
+                full_name: document.getElementById('full_name').value,
+                field_of_study: document.getElementById('field_of_study').value,
+                institution: document.getElementById('institution').value,
+                province: document.getElementById('province').value,
+                year_of_study: parseInt(document.getElementById('year_of_study').value),
+                average_mark: parseFloat(document.getElementById('average_mark').value),
+                parent_income: parseFloat(document.getElementById('parent_income').value),
+                gender: document.getElementById('gender').value,
+                race: document.getElementById('race').value,
+                career_interests: document.getElementById('career_interests').value,
+                skills: document.getElementById('skills').value,
+                bio: document.getElementById('bio').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/profile`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(profileData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Profile saved successfully!', 'success');
+                    calculateCompleteness();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showAlert(error.message, 'error');
+            }
+        });
+        
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+        
+        loadProfile();
+    </script>
+</body>
+</html>

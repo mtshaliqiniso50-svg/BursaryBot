@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - BursaryBot AI Assistant</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; }
+        
+        .navbar { background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .logo h1 { font-size: 1.5rem; background: linear-gradient(135deg, #0f766e, #0d5c56); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .nav-links a { margin-left: 20px; text-decoration: none; color: #555; }
+        
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        
+        .welcome-card { background: linear-gradient(135deg, #0f766e, #0d5c56); color: white; padding: 30px; border-radius: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .welcome-card h2 { margin-bottom: 10px; }
+        .start-chat-btn { background: white; color: #0f766e; padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; transition: transform 0.2s; display: inline-block; }
+        .start-chat-btn:hover { transform: translateY(-2px); }
+        
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .stat-card h3 { font-size: 2rem; color: #0f766e; }
+        .stat-card p { color: #64748b; }
+        
+        .recent-chats { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .recent-chats h3 { margin-bottom: 20px; color: #1e293b; }
+        .chat-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s; }
+        .chat-item:hover { background: #f1f5f9; }
+        .chat-question { flex: 1; font-weight: 500; }
+        .chat-date { color: #64748b; font-size: 12px; margin-right: 15px; }
+        .chat-badge { background: #0f766e; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; }
+        .no-chats { text-align: center; padding: 40px; color: #64748b; }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 20px;
+            padding: 25px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .question-box,
+        .answer-box {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .question-box {
+            background: #e0f2fe;
+        }
+
+        .answer-box {
+            background: #f8fafc;
+        }
+
+        .quick-actions { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
+        .quick-btn { background: #f1f5f9; padding: 12px 20px; border-radius: 30px; text-decoration: none; color: #1e293b; transition: all 0.2s; }
+        .quick-btn:hover { background: #e2e8f0; transform: translateX(5px); }
+        
+        @media (max-width: 768px) { .welcome-card { flex-direction: column; text-align: center; gap: 15px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h1>🤖 BursaryBot</h1></div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="chat.html">New Chat</a>
+            <a href="profile.html">Profile</a>
+            <a href="#" id="logoutBtn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome-card">
+            <div>
+                <h2>Welcome back, <span id="userName">Student</span>! 👋</h2>
+                <p>Your AI bursary assistant is ready to help you find funding.</p>
+            </div>
+            <a href="chat.html" class="start-chat-btn">💬 Start Conversation</a>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="chatCount">0</h3>
+                <p>Total Conversations</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="bursaryCount">0</h3>
+                <p>Bursaries Found</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="matchCount">0</h3>
+                <p>Your Matches</p>
+            </div>
+        </div>
+        
+        <div class="recent-chats">
+            <h3>📋 Recent Conversations</h3>
+            <div id="chatHistory"></div>
+        </div>
+        
+        <div class="quick-actions">
+            <a href="chat.html" class="quick-btn">💬 New Chat</a>
+            <a href="profile.html" class="quick-btn">✏️ Update Profile</a>
+        </div>
+    </div>
+
+    <!-- Conversation Modal -->
+    <div id="conversationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💬 Conversation Details</h2>
+                <span class="close-modal" onclick="closeConversation()">&times;</span>
+            </div>
+            <div id="conversationContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://bursarybot-backend.onrender.com/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        // Global variable to store all chats
+        let allChats = [];
+        
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('userName').textContent = user.username || 'Student';
+
+        // View conversation details
+        function viewConversation(chatId) {
+            const chat = allChats.find(c => c.id === chatId);
+            if (!chat) return;
+
+            document.getElementById('conversationContent').innerHTML = `
+                <div class="question-box">
+                    <h3>🙋 Your Question</h3>
+                    <p>${escapeHtml(chat.question)}</p>
+                </div>
+                <div class="answer-box">
+                    <h3>🤖 BursaryBot Response</h3>
+                    <p>${escapeHtml(chat.answer).replace(/\n/g, '<br>')}</p>
+                </div>
+                <small>📅 ${new Date(chat.created_at).toLocaleString()}</small>
+            `;
+
+            document.getElementById('conversationModal').style.display = 'flex';
+        }
+
+        function closeConversation() {
+            document.getElementById('conversationModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('conversationModal');
+            if (event.target === modal) {
+                closeConversation();
+            }
+        };
+
+        async function loadDashboard() {
+            try {
+                // Load chat history
+                const historyRes = await fetch(`${API_URL}/chat/history`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const historyData = await historyRes.json();
+                
+                // Save all chats to global variable
+                allChats = historyData.history || [];
+
+                const chatCount = allChats.length;
+                document.getElementById('chatCount').textContent = chatCount;
+
+                if (allChats.length > 0) {
+                    document.getElementById('chatHistory').innerHTML = allChats
+                        .slice(0, 10)
+                        .map(chat => `
+                            <div class="chat-item" onclick="viewConversation(${chat.id})">
+                                <div class="chat-question">${escapeHtml(chat.question.substring(0, 80))}${chat.question.length > 80 ? '...' : ''}</div>
+                                <div class="chat-date">${new Date(chat.created_at).toLocaleDateString()}</div>
+                            </div>
+                        `)
+                        .join('');
+                } else {
+                    document.getElementById('chatHistory').innerHTML = `<div class="no-chats">No conversations yet. <a href="chat.html">Start your first chat!</a></div>`;
+                }
+
+                // Load bursaries
+                const bursaryRes = await fetch(`${API_URL}/external-bursaries`);
+                const bursaryData = await bursaryRes.json();
+                document.getElementById('bursaryCount').textContent = bursaryData.bursaries?.length || 0;
+
+                // AI-powered matches
+                document.getElementById('matchCount').textContent = bursaryData.bursaries?.length || 0;
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        loadDashboard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BursaryBot - AI Bursary Assistant for South African Students</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; }
+        
+        /* Navbar */
+        .navbar { background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo h1 { font-size: 1.5rem; background: linear-gradient(135deg, #0f766e, #0d5c56); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .nav-links a { margin-left: 20px; text-decoration: none; color: #555; transition: color 0.3s; }
+        .nav-links a:hover { color: #0f766e; }
+        .btn-nav { background: #0f766e; color: white !important; padding: 8px 20px; border-radius: 30px; }
+        .btn-nav:hover { background: #0d5c56; }
+        
+        /* Hero Section */
+        .hero { background: linear-gradient(135deg, #0f766e, #0d5c56); color: white; padding: 80px 20px; text-align: center; }
+        .hero h1 { font-size: 3rem; margin-bottom: 20px; }
+        .hero p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 30px; opacity: 0.9; }
+        .hero-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn-primary { background: white; color: #0f766e; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; transition: transform 0.2s; }
+        .btn-primary:hover { transform: translateY(-3px); }
+        .btn-secondary { background: transparent; border: 2px solid white; color: white; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; transition: transform 0.2s; }
+        .btn-secondary:hover { transform: translateY(-3px); background: rgba(255,255,255,0.1); }
+        
+        /* Features */
+        .features { padding: 60px 20px; max-width: 1200px; margin: 0 auto; }
+        .features h2 { text-align: center; font-size: 2rem; margin-bottom: 40px; color: #1e293b; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .feature-card { background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); }
+        .feature-icon { font-size: 3rem; margin-bottom: 15px; }
+        .feature-card h3 { margin-bottom: 10px; color: #1e293b; }
+        .feature-card p { color: #64748b; }
+        
+        /* How It Works */
+        .how-it-works { background: white; padding: 60px 20px; }
+        .how-it-works h2 { text-align: center; font-size: 2rem; margin-bottom: 40px; color: #1e293b; }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto; }
+        .step { text-align: center; }
+        .step-number { width: 50px; height: 50px; background: #0f766e; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin: 0 auto 15px; }
+        
+        /* Footer */
+        footer { background: #1e293b; color: #94a3b8; text-align: center; padding: 30px; margin-top: 40px; }
+        
+        @media (max-width: 768px) { .hero h1 { font-size: 2rem; } .nav-links a { margin-left: 10px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><h1>🤖 BursaryBot</h1></div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="login.html" class="btn-nav">Login</a>
+            <a href="register.html" class="btn-nav">Sign Up</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Your AI-Powered Bursary Assistant</h1>
+        <p>Get personalized bursary recommendations, application tips, and answers to all your funding questions - 24/7 AI assistance.</p>
+        <div class="hero-buttons">
+            <a href="register.html" class="btn-primary">Get Started Free</a>
+            <a href="login.html" class="btn-secondary">Login</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <h2>Why Choose BursaryBot?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI-Powered Assistance</h3>
+                <p>Ask anything about bursaries - get instant, personalized answers from our AI assistant.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Smart Matching</h3>
+                <p>Our AI analyzes your profile and finds bursaries you actually qualify for.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>Application Help</h3>
+                <p>Get tips on motivation letters, document preparation, and interview preparation.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>Real-time Search</h3>
+                <p>Search for bursaries from anywhere - government, private sector, SETAs, universities.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>Conversation History</h3>
+                <p>All your chats are saved. Continue conversations anytime.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Free & Secure</h3>
+                <p>Completely free for students. Your data is safe and secure.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Create Account</h3>
+                <p>Sign up in 30 seconds - it's free!</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Complete Profile</h3>
+                <p>Tell us about your studies, marks, and interests.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Chat with AI</h3>
+                <p>Ask anything about bursaries. Get instant answers.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Apply & Succeed</h3>
+                <p>Get personalized recommendations and apply.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 BursaryBot - AI Bursary Assistant for South African Students</p>
+        <p style="margin-top: 10px; font-size: 12px;">Helping students find funding for their education</p>
+    </footer>
+</body>
+</html>
