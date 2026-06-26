@@ -1,4 +1,4 @@
-// server/config/db.js
+﻿// server/config/db.js
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
 const path = require('path');
@@ -11,11 +11,11 @@ const sslConfig = process.env.DB_SSL === 'true' ? {
 } : undefined;
 
 const pool = mysql.createPool({
-    host: process.env.DB_HOST || '127.0.0.1',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '@SpheH2blevel4',
-    database: process.env.DB_NAME || 'bursarybot_db',
-    port: parseInt(process.env.DB_PORT) || 3306,
+    host: process.env.DB_HOST || 'mysql-37808095-live-da0b.l.aivencloud.com',
+    user: process.env.DB_USER || 'avnadmin',
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME || 'defaultdb',
+    port: parseInt(process.env.DB_PORT) || 17811,
     ssl: sslConfig,
     waitForConnections: true,
     connectionLimit: 10,
@@ -24,5 +24,7 @@ const pool = mysql.createPool({
     keepAliveInitialDelay: 0,
     connectTimeout: 30000
 });
+
+console.log('Database pool created with Aiven MySQL');
 
 module.exports = pool;
