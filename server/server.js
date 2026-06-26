@@ -18,22 +18,30 @@ const app = express();
 // MIDDLEWARE
 // ============================================
 
+// Trust proxy - Required for Render.com and other cloud platforms
+// This fixes the 'X-Forwarded-For' header warning
+app.set('trust proxy', 1);
+
 // Rate limiting to prevent abuse
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
     message: {
         success: false,
         message: 'Too many requests from this IP, please try again later.'
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Custom key generator to handle proxy headers
+    keyGenerator: (req) => {
+        return req.ip || req.connection.remoteAddress;
+    }
 });
 app.use('/api/', limiter);
 
-// CORS - Allow all devices
+// CORS - Allow all devices (laptop, phone, tablet)
 app.use(cors({
-    origin: '*',
+    origin: '*', // Allow all origins for testing
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
@@ -142,6 +150,14 @@ app.use((err, req, res, next) => {
         });
     }
     
+    // JSON parsing error
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid JSON payload. Please check your request body.'
+        });
+    }
+    
     res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -153,16 +169,43 @@ app.use((err, req, res, next) => {
 // START SERVER
 // ============================================
 
+// Get network IP addresses for display
+const getNetworkAddresses = () => {
+    const os = require('os');
+    const interfaces = os.networkInterfaces();
+    const addresses = [];
+    
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            // Skip internal and non-IPv4 addresses
+            if (iface.family === 'IPv4' && !iface.internal) {
+                addresses.push(iface.address);
+            }
+        }
+    }
+    return addresses;
+};
+
 const PORT = process.env.PORT || 5000;
 
-// Start server
+// Start server on all network interfaces (0.0.0.0)
 app.listen(PORT, '0.0.0.0', () => {
     console.log('\n' + '═'.repeat(60));
     console.log('🚀 BURSARYBOT SERVER IS RUNNING!');
     console.log('═'.repeat(60));
     console.log(`📍 Port:           ${PORT}`);
     console.log(`📍 Environment:    ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📍 Database:       ${process.env.DB_NAME || 'bursarybot_db'}`);
+    console.log(`📍 Database:       ${process.env.DB_NAME || 'defaultdb'}`);
+    
+    // Show network addresses for mobile/other devices
+    const networkIPs = getNetworkAddresses();
+    if (networkIPs.length > 0 && process.env.NODE_ENV !== 'production') {
+        console.log('\n📱 Network Access:');
+        networkIPs.forEach(ip => {
+            console.log(`   http://${ip}:${PORT}`);
+        });
+    }
+    
     console.log('\n📋 Available Endpoints:');
     console.log(`   🏠 Frontend:       http://localhost:${PORT}`);
     console.log(`   🔌 API Base:       http://localhost:${PORT}/api`);
@@ -170,6 +213,8 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   📱 Mobile View:    http://localhost:${PORT}/api/mobile`);
     console.log(`   📋 Bursaries:      http://localhost:${PORT}/api/external-bursaries`);
     console.log(`   🔐 Auth:           http://localhost:${PORT}/api/auth`);
+    console.log(`   👤 Profile:        http://localhost:${PORT}/api/profile`);
+    console.log(`   💬 Chat:           http://localhost:${PORT}/api/chat`);
     console.log('═'.repeat(60));
     console.log('🎯 Ready for requests!\n');
 });
