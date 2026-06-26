@@ -1,40 +1,28 @@
-const mysql = require('mysql2');
+// server/config/db.js
+const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
+const path = require('path');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-// Create connection pool
+// SSL configuration for cloud databases
+const sslConfig = process.env.DB_SSL === 'true' ? {
+    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false' ? false : true
+} : undefined;
+
 const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || '127.0.0.1',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '@SpheH2blevel4',
     database: process.env.DB_NAME || 'bursarybot_db',
+    port: parseInt(process.env.DB_PORT) || 3306,
+    ssl: sslConfig,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
     enableKeepAlive: true,
-    keepAliveInitialDelay: 0
+    keepAliveInitialDelay: 0,
+    connectTimeout: 30000
 });
 
-const promisePool = pool.promise();
-
-// Test connection
-const testConnection = async () => {
-    try {
-        const connection = await promisePool.getConnection();
-        console.log('✅ MySQL database connected successfully');
-        connection.release();
-        return true;
-    } catch (error) {
-        console.error('❌ MySQL connection failed:', error.message);
-        console.log('\n📌 Troubleshooting:');
-        console.log('1. Make sure MySQL is running');
-        console.log('2. Check your .env credentials');
-        console.log('3. Run the database.sql file first');
-        return false;
-    }
-};
-
-testConnection();
-
-module.exports = promisePool;
+module.exports = pool;

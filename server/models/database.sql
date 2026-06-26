@@ -10,7 +10,6 @@ CREATE TABLE users (
     phone VARCHAR(20),
     password VARCHAR(255) NOT NULL,
     profile_pic VARCHAR(255),
-    role ENUM('student', 'admin') DEFAULT 'student',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
